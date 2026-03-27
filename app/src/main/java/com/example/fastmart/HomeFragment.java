@@ -33,9 +33,17 @@ public class HomeFragment extends Fragment {
         rvDeals.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         DealsAdapter dealsAdapter = new DealsAdapter(dealsList);
         rvDeals.setAdapter(dealsAdapter);
-
         rvRecommended.setLayoutManager(new GridLayoutManager(getContext(), 2));
-
+        List<Product> recommendedList = new ArrayList<>();
+        for(int i=0; i<5;i++)
+        {
+            recommendedList.add(new Product("RØDE PodMic", 199.99, 199.99, "Model: WH-1000XM4, Black", "Microphone", R.drawable.mic_rode));
+            recommendedList.add(new Product("SONY Headphones", 399.99, 399.99, "Model: WH-1000XM5, Beige", "Headphone", R.drawable.headphones_beige));
+            recommendedList.add(new Product("Google Nest Mini", 99.99, 99.99, "Model: WH-1000XM6, White", "Nest-Mini", R.drawable.nest_mini));
+            recommendedList.add(new Product("SONY Headphones", 399.99, 399.99, "Model: WH-1000XM5, Black", "Headphone", R.drawable.headphones_black));
+        }
+        RecommendedAdapter recAdapter = new RecommendedAdapter(recommendedList);
+        rvRecommended.setAdapter(recAdapter);
         return view;
     }
 }
