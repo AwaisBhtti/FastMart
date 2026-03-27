@@ -7,6 +7,7 @@ public class Product {
     private double originalPrice;
     private String description;
     private int imageResource;
+    private boolean isFavourite=false;
 
     public Product(String title, double price, double originalPrice, String description, String category, int imageResource) {
         this.title = title;
@@ -23,4 +24,6 @@ public class Product {
     public String getDescription() { return description; }
     public int getImageResource() { return imageResource;}
     public String getCategory() { return category; }
+    public boolean isFavourite() { return isFavourite; }
+    public void setFavourite(boolean favourite) { isFavourite = favourite; }
 }

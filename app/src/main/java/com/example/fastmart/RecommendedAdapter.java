@@ -2,6 +2,7 @@ package com.example.fastmart;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +34,18 @@ public class RecommendedAdapter extends RecyclerView.Adapter<RecommendedAdapter.
         holder.tvPrice.setText(String.format("$%.2f", product.getPrice()));
         holder.tvModel.setText(product.getDescription());
         holder.imgProduct.setImageResource(product.getImageResource());
+
+        if (product.isFavourite()) {
+            holder.imgHeart.setColorFilter(Color.RED);
+        } else {
+            holder.imgHeart.setColorFilter(Color.BLACK);
+        }
+
+        holder.imgHeart.setOnClickListener(v -> {
+            product.setFavourite(!product.isFavourite());
+            notifyItemChanged(position);
+        });
+
         holder.itemView.setOnClickListener(v -> {
             Context context = v.getContext();
             Intent intent = new Intent(context, ProductActivity.class);
@@ -50,7 +63,7 @@ public class RecommendedAdapter extends RecyclerView.Adapter<RecommendedAdapter.
     }
 
     public static class RecViewHolder extends RecyclerView.ViewHolder {
-        ImageView imgProduct;
+        ImageView imgProduct, imgHeart;
         TextView tvPrice, tvName, tvModel;
 
         public RecViewHolder(@NonNull View itemView) {
@@ -59,6 +72,7 @@ public class RecommendedAdapter extends RecyclerView.Adapter<RecommendedAdapter.
             tvPrice = itemView.findViewById(R.id.tvRecPrice);
             tvName = itemView.findViewById(R.id.tvRecName);
             tvModel = itemView.findViewById(R.id.tvRecModel);
+            imgHeart = itemView.findViewById(R.id.imgRecHeart);
         }
     }
 }
