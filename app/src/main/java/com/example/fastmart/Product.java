@@ -2,6 +2,7 @@ package com.example.fastmart;
 
 public class Product {
     private String title;
+    String id="";
     private String category;
     private double price;
     private double originalPrice;
@@ -26,4 +27,6 @@ public class Product {
     public String getCategory() { return category; }
     public boolean isFavourite() { return isFavourite; }
     public void setFavourite(boolean favourite) { isFavourite = favourite; }
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 }

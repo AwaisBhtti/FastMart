@@ -42,6 +42,12 @@ public class HomeFragment extends Fragment {
             recommendedList.add(new Product("Google Nest Mini", 99.99, 99.99, "Model: WH-1000XM6, White", "Nest-Mini", R.drawable.nest_mini));
             recommendedList.add(new Product("SONY Headphones", 399.99, 399.99, "Model: WH-1000XM5, Black", "Headphone", R.drawable.headphones_black));
         }
+        String i="1";
+        for(Product p:recommendedList)
+        {
+            p.setId(i);
+            i=String.valueOf(Integer.parseInt(i)+1);
+        }
         RecommendedAdapter recAdapter = new RecommendedAdapter(recommendedList);
         rvRecommended.setAdapter(recAdapter);
         return view;
