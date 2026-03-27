@@ -1,64 +1,88 @@
 package com.example.fastmart;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
+import android.telephony.SmsManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link CartFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class CartFragment extends Fragment {
+public class CartFragment extends Fragment implements CartAdapter.OnCartChangedListener {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private RecyclerView rvCart;
+    private TextView tvTotal;
+    private Button btnCheckout;
+    private CartAdapter adapter;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_cart, container, false);
 
-    public CartFragment() {
-        // Required empty public constructor
+        rvCart = view.findViewById(R.id.rvCart);
+        tvTotal = view.findViewById(R.id.tvCartTotal);
+        btnCheckout = view.findViewById(R.id.btnCheckout);
+
+        rvCart.setLayoutManager(new LinearLayoutManager(getContext()));
+        adapter = new CartAdapter(CartManager.getCartItems(), this);
+        rvCart.setAdapter(adapter);
+
+        updateTotalText();
+
+        btnCheckout.setOnClickListener(v -> showConfirmationDialog());
+
+        return view;
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment CartFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static CartFragment newInstance(String param1, String param2) {
-        CartFragment fragment = new CartFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    private void showConfirmationDialog() {
+        new AlertDialog.Builder(getContext())
+                .setTitle("Checkout Confirmation")
+                .setMessage("Are you sure you want to checkout with bill of " + tvTotal.getText().toString().trim() + "?")
+                .setPositiveButton("Yes", (dialog, which) -> sendSMS(tvTotal.getText().toString().trim()))
+                .setNegativeButton("No", null)
+                .show();
+    }
+
+    private void updateTotalText() {
+        tvTotal.setText(String.format("Total: $%.2f", CartManager.calculateTotal()));
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+    public void onCartUpdated() { updateTotalText(); }
+
+    private void sendSMS(String total) {
+        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.SEND_SMS}, 100);
         }
-    }
+        else {
+            try {
+                String phoneNumber = "+923144536266";
+                String message = total + " bill done.";
+                SmsManager smsManager = SmsManager.getDefault();
+                smsManager.sendTextMessage(phoneNumber, null, message, null, null);
+                CartManager.clearCart();
+                if (adapter != null) {
+                    adapter.notifyDataSetChanged();
+                }
+                updateTotalText();
+                Toast.makeText(getContext(), "Order Placed & SMS Sent!", Toast.LENGTH_SHORT).show();
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_cart, container, false);
+            } catch (Exception e) {
+                Toast.makeText(getContext(), "SMS Failed. Check Permissions.", Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
+            }
+        }
     }
 }

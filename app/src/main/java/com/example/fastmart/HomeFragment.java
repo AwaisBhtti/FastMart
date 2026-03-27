@@ -37,16 +37,15 @@ public class HomeFragment extends Fragment {
         List<Product> recommendedList = new ArrayList<>();
         for(int i=0; i<5;i++)
         {
-            recommendedList.add(new Product("RØDE PodMic", 199.99, 199.99, "Model: WH-1000XM4, Black", "Microphone", R.drawable.mic_rode));
-            recommendedList.add(new Product("SONY Headphones", 399.99, 399.99, "Model: WH-1000XM5, Beige", "Headphone", R.drawable.headphones_beige));
-            recommendedList.add(new Product("Google Nest Mini", 99.99, 99.99, "Model: WH-1000XM6, White", "Nest-Mini", R.drawable.nest_mini));
-            recommendedList.add(new Product("SONY Headphones", 399.99, 399.99, "Model: WH-1000XM5, Black", "Headphone", R.drawable.headphones_black));
-        }
-        String i="1";
-        for(Product p:recommendedList)
-        {
-            p.setId(i);
-            i=String.valueOf(Integer.parseInt(i)+1);
+            int id1,id2,id3,id4;
+            id1=4*i+1;
+            id2=4*i+2;
+            id3=4*i+3;
+            id4=4*i+4;
+            recommendedList.add(new Product(""+id1,"RØDE PodMic", 199.99, 199.99, "Model: WH-1000XM4, Black", "Microphone", R.drawable.mic_rode));
+            recommendedList.add(new Product(""+id2,"SONY Headphones", 399.99, 399.99, "Model: WH-1000XM5, Beige", "Headphone", R.drawable.headphones_beige));
+            recommendedList.add(new Product(""+id3,"Google Nest Mini", 99.99, 99.99, "Model: WH-1000XM6, White", "Nest-Mini", R.drawable.nest_mini));
+            recommendedList.add(new Product(""+id4,"SONY Headphones", 399.99, 399.99, "Model: WH-1000XM5, Black", "Headphone", R.drawable.headphones_black));
         }
         RecommendedAdapter recAdapter = new RecommendedAdapter(recommendedList);
         rvRecommended.setAdapter(recAdapter);
