@@ -25,4 +25,10 @@
     <string name="shipping">Shipping</string>
     <string name="total">Total</string>
     <string name="checkout">Checkout</string>
+    <string name="search_title">Search</string>
+    <string name="placeholder">placeholder</string>
+    <string name="recent_searches">Recent Searches</string>
+    <string name="clear_all">Clear all</string>
+    <string name="product_found">Product Found.</string>
+    <string name="ok">OK</string>
 </resources>

@@ -1,64 +1,132 @@
 package com.example.fastmart;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link SearchFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 public class SearchFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private EditText etSearch;
+    private ImageView btnBack;
+    private TextView btnClearAll;
+    private SharedPreferences sp;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private RecyclerView rvSearchHistory;
+    private SearchHistoryAdapter historyAdapter;
+    private List<String> historyList;
 
-    public SearchFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment SearchFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static SearchFragment newInstance(String param1, String param2) {
-        SearchFragment fragment = new SearchFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
+    @Nullable
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_search, container, false);
+        etSearch = view.findViewById(R.id.etSearch);
+        btnBack = view.findViewById(R.id.btnSearchBack);
+        btnClearAll = view.findViewById(R.id.btnClearAll);
+        rvSearchHistory = view.findViewById(R.id.rvSearchHistory);
+
+        sp = requireContext().getSharedPreferences("pref", Context.MODE_PRIVATE);
+        historyList = new ArrayList<>();
+        rvSearchHistory.setLayoutManager(new LinearLayoutManager(getContext()));
+        loadHistory();
+        btnBack.setOnClickListener(v -> hideKeyboard());
+        etSearch.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                String query = etSearch.getText().toString().trim();
+                if (!query.isEmpty()) {
+                    saveToHistory(query);
+                    runSearchAlgorithm(query);
+                    hideKeyboard();
+                }
+                return true;
+            }
+            return false;
+        });
+
+        btnClearAll.setOnClickListener(v -> {
+            sp.edit().remove("user1.searchHistory").apply();
+            historyList.clear();
+            if (historyAdapter != null) {
+                historyAdapter.notifyDataSetChanged();
+            }
+            Toast.makeText(getContext(), "History Cleared", Toast.LENGTH_SHORT).show();
+        });
+
+        return view;
+    }
+
+    private void loadHistory() {
+        Set<String> savedHistory = sp.getStringSet("user1.searchHistory", new HashSet<>());
+        historyList.clear();
+        historyList.addAll(savedHistory);
+
+        historyAdapter = new SearchHistoryAdapter(historyList);
+        rvSearchHistory.setAdapter(historyAdapter);
+    }
+
+    private void runSearchAlgorithm(String query) {
+        List<Product> list = new ArrayList<>();
+        for (int i = 1; i <= 20; i++) {
+            String id = String.valueOf(i);
+            int pattern = i % 4;
+            if (pattern == 1) {
+                list.add(new Product(id, "RØDE PodMic", 199.99, 199.99, "Model: WH-1000XM4, Black", "Microphone", R.drawable.mic_rode));
+            } else if (pattern == 2) {
+                list.add(new Product(id, "SONY Headphones", 399.99, 399.99, "Model: WH-1000XM5, Beige", "Headphone", R.drawable.headphones_beige));
+            } else if (pattern == 3) {
+                list.add(new Product(id, "Google Nest Mini", 99.99, 99.99, "Model: WH-1000XM6, White", "Nest-Mini", R.drawable.nest_mini));
+            } else {
+                list.add(new Product(id, "SONY Headphones", 399.99, 399.99, "Model: WH-1000XM5, Black", "Headphone", R.drawable.headphones_black));
+            }
+        }
+
+        boolean isFound = false;
+        for (Product p : list) {
+            if (p.getTitle().equalsIgnoreCase(query)) {
+                isFound = true;
+                break;
+            }
+        }
+
+        if (isFound) {
+            new AlertDialog.Builder(requireContext())
+                    .setMessage(getString(R.string.product_found))
+                    .setPositiveButton(getString(R.string.ok), null)
+                    .show();
         }
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_search, container, false);
+    private void saveToHistory(String query) {
+        Set<String> history = sp.getStringSet("user1.searchHistory", new HashSet<>());
+        Set<String> newHistory = new HashSet<>(history);
+        newHistory.add(query);
+        sp.edit().putStringSet("user1.searchHistory", newHistory).apply();
+
+        loadHistory();
+    }
+
+    private void hideKeyboard() {
+        InputMethodManager imm = (InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(etSearch.getWindowToken(), 0);
     }
 }
