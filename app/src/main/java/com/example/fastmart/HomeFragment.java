@@ -26,9 +26,9 @@ public class HomeFragment extends Fragment {
         rvRecommended = view.findViewById(R.id.rvRecommended);
 
         List<Product> dealsList = new ArrayList<>();
-        dealsList.add(new Product("RØDE PodMic", 108.20, 199.99, "Dynamic microphone, Speaker microphone", "Microphone", R.drawable.mic_rode));
-        dealsList.add(new Product("SONY Headphones", 349.99, 399.99, "Premium Wireless Noise Cancelling", "Headphone", R.drawable.headphones_beige));
-        dealsList.add(new Product("Google Nest Mini", 70.99, 99.99, "Smart speaker with Google Assistant", "Nest-Mini", R.drawable.nest_mini));
+        dealsList.add(new Product("-1","RØDE PodMic", 108.20, 199.99, "Dynamic microphone, Speaker microphone", "Microphone", R.drawable.mic_rode));
+        dealsList.add(new Product("-2","SONY Headphones", 349.99, 399.99, "Premium Wireless Noise Cancelling", "Headphone", R.drawable.headphones_beige));
+        dealsList.add(new Product("-3","Google Nest Mini", 70.99, 99.99, "Smart speaker with Google Assistant", "Nest-Mini", R.drawable.nest_mini));
 
         rvDeals.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         DealsAdapter dealsAdapter = new DealsAdapter(dealsList);

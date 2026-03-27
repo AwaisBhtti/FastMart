@@ -43,8 +43,10 @@ public class FavouritesAdapter extends RecyclerView.Adapter<FavouritesAdapter.Fa
 
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, ProductActivity.class);
+            intent.putExtra("ID", product.getId());
             intent.putExtra("NAME", product.getTitle());
             intent.putExtra("PRICE", String.format("$%.2f", product.getPrice()));
+            intent.putExtra("ORIGINAL_PRICE", String.format("$%.2f", product.getOriginalPrice()));
             intent.putExtra("DESC", product.getDescription());
             intent.putExtra("IMG", product.getImageResource());
             intent.putExtra("CATEGORY", product.getCategory());

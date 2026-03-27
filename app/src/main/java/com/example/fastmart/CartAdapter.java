@@ -45,6 +45,8 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             intent.putExtra("DESC", item.getProduct().getDescription());
             intent.putExtra("IMG", item.getProduct().getImageResource());
             intent.putExtra("CATEGORY", item.getProduct().getCategory());
+            intent.putExtra("ID", item.getProduct().getId());
+            intent.putExtra("ORIGINAL_PRICE", String.format("$%.2f", item.getProduct().getOriginalPrice()));
             v.getContext().startActivity(intent);
         });
 
