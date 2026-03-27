@@ -1,5 +1,6 @@
 package com.example.fastmart;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +37,16 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         holder.tvPrice.setText(String.format("$%.2f", item.getProduct().getPrice()));
         holder.tvQuantity.setText(String.valueOf(item.getQuantity()));
         holder.imgProduct.setImageResource(item.getProduct().getImageResource());
+
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), ProductActivity.class);
+            intent.putExtra("NAME", item.getProduct().getTitle());
+            intent.putExtra("PRICE", String.format("$%.2f", item.getProduct().getPrice()));
+            intent.putExtra("DESC", item.getProduct().getDescription());
+            intent.putExtra("IMG", item.getProduct().getImageResource());
+            intent.putExtra("CATEGORY", item.getProduct().getCategory());
+            v.getContext().startActivity(intent);
+        });
 
         holder.btnPlus.setOnClickListener(v -> {
             item.setQuantity(item.getQuantity() + 1);

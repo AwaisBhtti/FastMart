@@ -44,6 +44,7 @@ public class DealsAdapter extends RecyclerView.Adapter<DealsAdapter.DealViewHold
             intent.putExtra("PRICE", String.format("$%.2f", product.getPrice()));
             intent.putExtra("DESC", product.getDescription());
             intent.putExtra("IMG", product.getImageResource());
+            intent.putExtra("CATEGORY", product.getCategory());
             context.startActivity(intent);
         });
 

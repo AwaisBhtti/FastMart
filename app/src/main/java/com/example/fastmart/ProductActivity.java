@@ -1,12 +1,6 @@
 package com.example.fastmart;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
-import android.Manifest;
-import android.content.pm.PackageManager;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import android.telephony.SmsManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -20,50 +14,43 @@ public class ProductActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product);
+
         ImageView img = findViewById(R.id.pImg);
         TextView nameTxt = findViewById(R.id.pName);
         TextView priceTxt = findViewById(R.id.pPrice);
         TextView descTxt = findViewById(R.id.pDesc);
         Button btnBuy = findViewById(R.id.btnBuy);
-
         String name = getIntent().getStringExtra("NAME");
-        String price = getIntent().getStringExtra("PRICE");
+        String priceStr = getIntent().getStringExtra("PRICE");
         String desc = getIntent().getStringExtra("DESC");
         int imgRes = getIntent().getIntExtra("IMG", 0);
-
+        String id = getIntent().getStringExtra("ID");
+        String category = getIntent().getStringExtra("CATEGORY");
         nameTxt.setText(name);
-        priceTxt.setText(price);
+        priceTxt.setText(priceStr);
         descTxt.setText(desc);
         img.setImageResource(imgRes);
-        btnBuy.setOnClickListener(v -> showConfirmationDialog(name));
+        btnBuy.setOnClickListener(v -> showConfirmationDialog(name, priceStr,category, desc, imgRes, id));
     }
 
-    private void showConfirmationDialog(String productName) {
+    private void showConfirmationDialog(String name, String priceStr,String category, String desc, int imgRes, String id) {
         new AlertDialog.Builder(this)
-                .setTitle("Buy Now")
-                .setMessage("Are you sure you want to buy " + productName + "?")
-                .setPositiveButton("Buy", (dialog, which) -> sendSMS(productName))
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
-
-    private void sendSMS(String productName) {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS}, 100);
-        }
-        else {
+                .setTitle("Add to Cart")
+                .setMessage("Are you sure you want to add " + name + " to your cart?")
+                .setPositiveButton("Add", (dialog, which) -> {
+            double priceValue = 0;
             try {
-                String phoneNumber = "+923144536266";
-                String message = productName + " bought";
-
-                SmsManager smsManager = SmsManager.getDefault();
-                smsManager.sendTextMessage(phoneNumber, null, message, null, null);
-
-                Toast.makeText(this, "Order Placed & SMS Sent!", Toast.LENGTH_SHORT).show();
-            } catch (Exception e) {
-                Toast.makeText(this, "SMS Failed. Check Permissions.", Toast.LENGTH_SHORT).show();
+                priceValue = Double.parseDouble(priceStr.replace("$", ""));
+            }
+            catch (Exception e) {
                 e.printStackTrace();
             }
-        }
+            Product productToAdd = new Product(name, priceValue, priceValue, desc, category, imgRes);
+            productToAdd.setId(id);
+            CartManager.addItem(productToAdd);
+            Toast.makeText(this, "Added to Cart", Toast.LENGTH_SHORT).show();
+        })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 }

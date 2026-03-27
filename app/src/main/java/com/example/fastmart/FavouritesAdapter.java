@@ -47,6 +47,7 @@ public class FavouritesAdapter extends RecyclerView.Adapter<FavouritesAdapter.Fa
             intent.putExtra("PRICE", String.format("$%.2f", product.getPrice()));
             intent.putExtra("DESC", product.getDescription());
             intent.putExtra("IMG", product.getImageResource());
+            intent.putExtra("CATEGORY", product.getCategory());
             context.startActivity(intent);
         });
 
