@@ -31,4 +31,15 @@
     <string name="clear_all">Clear all</string>
     <string name="product_found">Product Found.</string>
     <string name="ok">OK</string>
+    <string name="account_details">Account Details</string>
+    <string name="hardcoded_name">Awais Akhtar</string>
+    <string name="hardcoded_email">awais@example.com</string>
+    <string name="hardcoded_dob">01-01-2000</string>
+    <string name="hardcoded_gender">Male</string>
+    <string name="hardcoded_phone">+92 312 3456 789</string>
+    <string name="full_name">Full Name</string>
+    <string name="shipping_address">Shipping Address</string>
+    <string name="date_of_birth">Date Of Birth</string>
+    <string name="gender">Gender</string>
+    <string name="phone_number">Phone Number</string>
 </resources>
