@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/white">
 
     <LinearLayout
@@ -117,6 +118,15 @@
             android:text="@string/hardcoded_phone"
             android:textColor="@color/black"
             android:layout_marginBottom="40dp"/>
+        <com.google.android.material.button.MaterialButton
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:id="@+id/btnLogout"
+            android:text="@string/logout"
+            app:cornerRadius="12dp"
+            android:backgroundTint="@color/black"
+            android:layout_marginBottom="20dp"
+            />
 
     </LinearLayout>
 </ScrollView>
