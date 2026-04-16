@@ -11,13 +11,15 @@ import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class SplashActivity extends AppCompatActivity {
+    ImageView truck;
+    Animation anim;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-        ImageView truck = findViewById(R.id.truckImg);
+        truck = findViewById(R.id.truckImg);
         SharedPreferences sp=getSharedPreferences("pref",MODE_PRIVATE);
-        Animation anim= AnimationUtils.loadAnimation(this,R.anim.truckanim);
+        anim= AnimationUtils.loadAnimation(this,R.anim.truckanim);
         truck.startAnimation(anim);
         new Handler().postDelayed(() -> {
             if(!sp.getBoolean("boardingShown",false))
