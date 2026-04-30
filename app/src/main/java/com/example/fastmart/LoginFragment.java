@@ -4,6 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,10 +20,12 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.fastmart.viewmodel.AuthViewModel;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
 public class LoginFragment extends Fragment {
 
     private TextInputEditText etEmail, etPassword;
+    private TextInputLayout lyEmail, lyPassword;
     private Button btnLogin;
     private AuthViewModel authViewModel;
 
@@ -34,20 +39,60 @@ public class LoginFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         etEmail = view.findViewById(R.id.etEmail);
         etPassword = view.findViewById(R.id.etPassword);
+        lyEmail = view.findViewById(R.id.lyEmail);
+        lyPassword = view.findViewById(R.id.lyPassword);
         btnLogin = view.findViewById(R.id.btnLogin);
 
         authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+
+        // Clear errors when typing
+        etEmail.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                lyEmail.setError(null);
+            }
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
+        etPassword.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                lyPassword.setError(null);
+            }
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
 
         btnLogin.setOnClickListener(v -> {
             String email = etEmail.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
 
-            if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(getContext(), "Please fill out all fields.", Toast.LENGTH_SHORT).show();
-                return;
+            boolean isValid = true;
+
+            if (email.isEmpty()) {
+                lyEmail.setError("Email is required");
+                isValid = false;
+            } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                lyEmail.setError("Invalid email format");
+                isValid = false;
             }
 
-            authViewModel.login(email, password);
+            if (password.isEmpty()) {
+                lyPassword.setError("Password is required");
+                isValid = false;
+            } else if (password.length() < 6) {
+                lyPassword.setError("Password must be at least 6 characters");
+                isValid = false;
+            }
+
+            if (isValid) {
+                authViewModel.login(email, password);
+            }
         });
 
         authViewModel.getUserDataLiveData().observe(getViewLifecycleOwner(), user -> {
@@ -68,9 +113,12 @@ public class LoginFragment extends Fragment {
                 }
                 startActivity(intent);
                 requireActivity().finish();
-            } else {
-                // This might be called if user data hasn't arrived yet or login failed
-                // Handled in repository/viewmodel usually with a status
+            }
+        });
+
+        authViewModel.getErrorLiveData().observe(getViewLifecycleOwner(), errorMessage -> {
+            if (errorMessage != null) {
+                Toast.makeText(getContext(), errorMessage, Toast.LENGTH_LONG).show();
             }
         });
     }

@@ -1,6 +1,7 @@
 package com.example.fastmart;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -19,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.fastmart.model.Product;
 import com.example.fastmart.viewmodel.FavouritesViewModel;
 import com.example.fastmart.viewmodel.ProductViewModel;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
 
@@ -29,6 +31,7 @@ public class HomeFragment extends Fragment {
     private ProductViewModel productViewModel;
     private FavouritesViewModel favouritesViewModel;
     private TextView tvHello;
+    private FloatingActionButton fabAddProduct;
 
     @Nullable
     @Override
@@ -38,10 +41,24 @@ public class HomeFragment extends Fragment {
         rvDeals = view.findViewById(R.id.rvDeals);
         rvRecommended = view.findViewById(R.id.rvRecommended);
         tvHello = view.findViewById(R.id.tvHello);
+        fabAddProduct = view.findViewById(R.id.fab_add_product_home);
 
         SharedPreferences sp = requireActivity().getSharedPreferences("pref", Context.MODE_PRIVATE);
         String name = sp.getString("name", "User");
+        String accountType = sp.getString("accountType", "Buyer");
+        
         tvHello.setText(getString(R.string.hello_user, name));
+
+        // Show FAB only for Sellers
+        if ("Seller".equalsIgnoreCase(accountType)) {
+            fabAddProduct.setVisibility(View.VISIBLE);
+        } else {
+            fabAddProduct.setVisibility(View.GONE);
+        }
+
+        fabAddProduct.setOnClickListener(v -> {
+            startActivity(new Intent(getActivity(), AddProductActivity.class));
+        });
 
         rvDeals.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         rvRecommended.setLayoutManager(new GridLayoutManager(getContext(), 2));
