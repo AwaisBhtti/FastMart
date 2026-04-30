@@ -1,36 +1,41 @@
 package com.example.fastmart;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
-import java.util.HashSet;
+
+import com.example.fastmart.model.Product;
+
 import java.util.List;
-import java.util.Set;
 
 public class FavouritesAdapter extends RecyclerView.Adapter<FavouritesAdapter.FavViewHolder> {
 
     private List<Product> favList;
-    private Context context;
+    private OnFavRemovedListener listener;
 
-    public FavouritesAdapter(List<Product> favList, Context context) {
+    public interface OnFavRemovedListener {
+        void onRemove(Product product);
+        void onAddToCart(Product product);
+    }
+
+    public FavouritesAdapter(List<Product> favList, OnFavRemovedListener listener) {
         this.favList = favList;
-        this.context = context;
+        this.listener = listener;
     }
 
     @NonNull
     @Override
     public FavViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_favourite, parent, false);
-        return new FavViewHolder(view);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_favourite, parent, false);
+        return new FavViewHolder(v);
     }
 
     @Override
@@ -38,43 +43,31 @@ public class FavouritesAdapter extends RecyclerView.Adapter<FavouritesAdapter.Fa
         Product product = favList.get(position);
         holder.tvName.setText(product.getTitle());
         holder.tvPrice.setText(String.format("$%.2f", product.getPrice()));
-        holder.tvModel.setText(product.getDescription());
-        holder.imgProduct.setImageResource(product.getImageResource());
+        holder.imgProduct.setImageResource(R.drawable.nest_mini); // Placeholder
+
+        holder.imgHeart.setOnClickListener(v -> {
+            new AlertDialog.Builder(v.getContext())
+                    .setTitle("Remove Favourite")
+                    .setMessage(R.string.delete_fav_msg)
+                    .setPositiveButton("Remove", (dialog, which) -> {
+                        listener.onRemove(product);
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        });
+
+        holder.imgCart.setOnClickListener(v -> {
+            listener.onAddToCart(product);
+        });
 
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, ProductActivity.class);
+            Intent intent = new Intent(v.getContext(), ProductActivity.class);
             intent.putExtra("ID", product.getId());
             intent.putExtra("NAME", product.getTitle());
             intent.putExtra("PRICE", String.format("$%.2f", product.getPrice()));
-            intent.putExtra("ORIGINAL_PRICE", String.format("$%.2f", product.getOriginalPrice()));
             intent.putExtra("DESC", product.getDescription());
-            intent.putExtra("IMG", product.getImageResource());
             intent.putExtra("CATEGORY", product.getCategory());
-            context.startActivity(intent);
-        });
-
-        holder.btnAddToCart.setOnClickListener(v -> {
-            CartManager.addItem(product);
-            Toast.makeText(context, context.getString(R.string.added_to_cart), Toast.LENGTH_SHORT).show();
-        });
-
-        holder.btnMoreOptions.setOnClickListener(v -> {
-            AlertDialog.Builder builder = new AlertDialog.Builder(context);
-            builder.setMessage(context.getString(R.string.delete_fav_msg));
-
-            builder.setPositiveButton("Yes", (dialog, which) -> {
-                SharedPreferences sp = context.getSharedPreferences("fav", Context.MODE_PRIVATE);
-                Set<String> savedIds = sp.getStringSet("FAV_IDS", new HashSet<>());
-                Set<String> editableIds = new HashSet<>(savedIds);
-                editableIds.remove(product.getId());
-                sp.edit().putStringSet("FAV_IDS", editableIds).apply();
-                favList.remove(position);
-                notifyItemRemoved(position);
-                notifyItemRangeChanged(position, favList.size());
-            });
-
-            builder.setNegativeButton("No", (dialog, which) -> dialog.dismiss());
-            builder.show();
+            v.getContext().startActivity(intent);
         });
     }
 
@@ -84,17 +77,14 @@ public class FavouritesAdapter extends RecyclerView.Adapter<FavouritesAdapter.Fa
     }
 
     public static class FavViewHolder extends RecyclerView.ViewHolder {
-        ImageView imgProduct, btnAddToCart, btnMoreOptions;
-        TextView tvName, tvPrice, tvModel;
+        TextView tvName, tvPrice;
+        ImageView imgProduct, imgHeart, imgCart;
 
-        public FavViewHolder(@NonNull View itemView) {
-            super(itemView);
-            imgProduct = itemView.findViewById(R.id.imgFavProduct);
-            btnAddToCart = itemView.findViewById(R.id.btnAddToCart);
-            btnMoreOptions = itemView.findViewById(R.id.btnMoreOptions);
-            tvName = itemView.findViewById(R.id.tvFavName);
-            tvPrice = itemView.findViewById(R.id.tvFavPrice);
-            tvModel = itemView.findViewById(R.id.tvFavModel);
+        public FavViewHolder(View v) {
+            super(v);
+            tvName = v.findViewById(R.id.tvFavName);
+            tvPrice = v.findViewById(R.id.tvFavPrice);
+            imgProduct = v.findViewById(R.id.imgFavProduct);
         }
     }
 }

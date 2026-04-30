@@ -13,16 +13,16 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
-import com.google.android.material.button.MaterialButton;
+import com.example.fastmart.viewmodel.AuthViewModel;
 import com.google.android.material.textfield.TextInputEditText;
-
-import kotlinx.coroutines.flow.SharedFlow;
 
 public class LoginFragment extends Fragment {
 
     private TextInputEditText etEmail, etPassword;
     private Button btnLogin;
+    private AuthViewModel authViewModel;
 
     @Nullable
     @Override
@@ -36,27 +36,41 @@ public class LoginFragment extends Fragment {
         etPassword = view.findViewById(R.id.etPassword);
         btnLogin = view.findViewById(R.id.btnLogin);
 
+        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+
         btnLogin.setOnClickListener(v -> {
-            String inputEmail = etEmail.getText().toString().trim();
-            String inputPassword = etPassword.getText().toString().trim();
-            if (inputEmail.isEmpty() || inputPassword.isEmpty()) {
+            String email = etEmail.getText().toString().trim();
+            String password = etPassword.getText().toString().trim();
+
+            if (email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(getContext(), "Please fill out all fields.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            SharedPreferences sp = requireActivity().getSharedPreferences("pref", Context.MODE_PRIVATE);
-            String savedEmail = sp.getString("savedEmail", "");
-            String savedPassword = sp.getString("savedPassword", "");
+            authViewModel.login(email, password);
+        });
 
-            if (inputEmail.equals(savedEmail) && inputPassword.equals(savedPassword)) {
+        authViewModel.getUserDataLiveData().observe(getViewLifecycleOwner(), user -> {
+            if (user != null) {
+                SharedPreferences sp = requireActivity().getSharedPreferences("pref", Context.MODE_PRIVATE);
                 SharedPreferences.Editor ed = sp.edit();
+                ed.putString("userId", user.getUserId());
+                ed.putString("name", user.getName());
+                ed.putString("accountType", user.getAccountType());
                 ed.putBoolean("loggedIn", true);
-                ed.commit();
-                Intent intent = new Intent(getActivity(), MainActivity.class);
+                ed.apply();
+
+                Intent intent;
+                if ("Seller".equalsIgnoreCase(user.getAccountType())) {
+                    intent = new Intent(getActivity(), SellerMainActivity.class);
+                } else {
+                    intent = new Intent(getActivity(), MainActivity.class);
+                }
                 startActivity(intent);
                 requireActivity().finish();
             } else {
-                Toast.makeText(getContext(), "Invalid email or password", Toast.LENGTH_SHORT).show();
+                // This might be called if user data hasn't arrived yet or login failed
+                // Handled in repository/viewmodel usually with a status
             }
         });
     }

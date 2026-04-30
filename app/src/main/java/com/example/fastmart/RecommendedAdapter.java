@@ -2,26 +2,36 @@ package com.example.fastmart;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.HashSet;
+import com.bumptech.glide.Glide;
+import com.example.fastmart.model.Product;
+import com.example.fastmart.viewmodel.FavouritesViewModel;
+
 import java.util.List;
-import java.util.Set;
+import java.util.Locale;
 
 public class RecommendedAdapter extends RecyclerView.Adapter<RecommendedAdapter.RecViewHolder> {
 
     private List<Product> recommendedList;
+    private FavouritesViewModel favouritesViewModel;
 
     public RecommendedAdapter(List<Product> recommendedList) {
         this.recommendedList = recommendedList;
+    }
+
+    // Constructor with ViewModel for handling favourites
+    public RecommendedAdapter(List<Product> recommendedList, FavouritesViewModel viewModel) {
+        this.recommendedList = recommendedList;
+        this.favouritesViewModel = viewModel;
     }
 
     @NonNull
@@ -35,41 +45,36 @@ public class RecommendedAdapter extends RecyclerView.Adapter<RecommendedAdapter.
     public void onBindViewHolder(@NonNull RecViewHolder holder, int position) {
         Product product = recommendedList.get(position);
         Context context = holder.itemView.getContext();
+
         holder.tvName.setText(product.getTitle());
-        holder.tvPrice.setText(String.format("$%.2f", product.getPrice()));
+        holder.tvPrice.setText(String.format(Locale.US, "$%.2f", product.getPrice()));
         holder.tvModel.setText(product.getDescription());
-        holder.imgProduct.setImageResource(product.getImageResource());
-        SharedPreferences sp = context.getSharedPreferences("fav", Context.MODE_PRIVATE);
-        Set<String> savedIds = sp.getStringSet("FAV_IDS", new HashSet<>());
-        product.setFavourite(savedIds.contains(product.getId()));
-        if (product.isFavourite()) {
-            holder.imgHeart.setColorFilter(Color.RED);
+
+        if (product.getImageUrl() != null && !product.getImageUrl().isEmpty()) {
+            Glide.with(context)
+                    .load(product.getImageUrl())
+                    .placeholder(R.drawable.nest_mini)
+                    .into(holder.imgProduct);
         } else {
-            holder.imgHeart.setColorFilter(Color.BLACK);
+            holder.imgProduct.setImageResource(R.drawable.nest_mini);
         }
-        holder.imgHeart.setOnClickListener(v -> {
-            Set<String> currentSavedIds = sp.getStringSet("FAV_IDS", new HashSet<>());
-            Set<String> editableIds = new HashSet<>(currentSavedIds);
 
-            String clickedId = product.getId();
+        if (favouritesViewModel != null) {
+            boolean isFav = favouritesViewModel.isFavourite(product.getId());
+            holder.imgHeart.setColorFilter(isFav ? Color.RED : Color.BLACK);
 
-            if (editableIds.contains(clickedId)) {
-                editableIds.remove(clickedId);
-            } else {
-                editableIds.add(clickedId);
-            }
-            sp.edit().putStringSet("FAV_IDS", editableIds).apply();
-            product.setFavourite(!product.isFavourite());
-            notifyItemChanged(position);
-        });
+            holder.imgHeart.setOnClickListener(v -> {
+                favouritesViewModel.toggleFavourite(product);
+                notifyItemChanged(position);
+            });
+        }
+
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, ProductActivity.class);
             intent.putExtra("ID", product.getId());
             intent.putExtra("NAME", product.getTitle());
-            intent.putExtra("PRICE", String.format("$%.2f", product.getPrice()));
-            intent.putExtra("ORIGINAL_PRICE", String.format("$%.2f", product.getOriginalPrice()));
+            intent.putExtra("PRICE", String.format(Locale.US, "$%.2f", product.getPrice()));
             intent.putExtra("DESC", product.getDescription());
-            intent.putExtra("IMG", product.getImageResource());
             intent.putExtra("CATEGORY", product.getCategory());
             context.startActivity(intent);
         });

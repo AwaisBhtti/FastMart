@@ -1,21 +1,34 @@
 package com.example.fastmart;
+
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import java.util.ArrayList;
+
+import com.example.fastmart.model.Product;
+import com.example.fastmart.viewmodel.FavouritesViewModel;
+import com.example.fastmart.viewmodel.ProductViewModel;
+
 import java.util.List;
 
 public class HomeFragment extends Fragment {
 
     private RecyclerView rvDeals;
     private RecyclerView rvRecommended;
+    private ProductViewModel productViewModel;
+    private FavouritesViewModel favouritesViewModel;
+    private TextView tvHello;
 
     @Nullable
     @Override
@@ -24,31 +37,28 @@ public class HomeFragment extends Fragment {
 
         rvDeals = view.findViewById(R.id.rvDeals);
         rvRecommended = view.findViewById(R.id.rvRecommended);
+        tvHello = view.findViewById(R.id.tvHello);
 
-        List<Product> dealsList = new ArrayList<>();
-        dealsList.add(new Product("-1","RØDE PodMic", 108.20, 199.99, "Dynamic microphone, Speaker microphone", "Microphone", R.drawable.mic_rode));
-        dealsList.add(new Product("-2","SONY Headphones", 349.99, 399.99, "Premium Wireless Noise Cancelling", "Headphone", R.drawable.headphones_beige));
-        dealsList.add(new Product("-3","Google Nest Mini", 70.99, 99.99, "Smart speaker with Google Assistant", "Nest-Mini", R.drawable.nest_mini));
+        SharedPreferences sp = requireActivity().getSharedPreferences("pref", Context.MODE_PRIVATE);
+        String name = sp.getString("name", "User");
+        tvHello.setText(getString(R.string.hello_user, name));
 
         rvDeals.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        DealsAdapter dealsAdapter = new DealsAdapter(dealsList);
-        rvDeals.setAdapter(dealsAdapter);
         rvRecommended.setLayoutManager(new GridLayoutManager(getContext(), 2));
-        List<Product> recommendedList = new ArrayList<>();
-        for(int i=0; i<5;i++)
-        {
-            int id1,id2,id3,id4;
-            id1=4*i+1;
-            id2=4*i+2;
-            id3=4*i+3;
-            id4=4*i+4;
-            recommendedList.add(new Product(""+id1,"RØDE PodMic", 199.99, 199.99, "Model: WH-1000XM4, Black", "Microphone", R.drawable.mic_rode));
-            recommendedList.add(new Product(""+id2,"SONY Headphones", 399.99, 399.99, "Model: WH-1000XM5, Beige", "Headphone", R.drawable.headphones_beige));
-            recommendedList.add(new Product(""+id3,"Google Nest Mini", 99.99, 99.99, "Model: WH-1000XM6, White", "Nest-Mini", R.drawable.nest_mini));
-            recommendedList.add(new Product(""+id4,"SONY Headphones", 399.99, 399.99, "Model: WH-1000XM5, Black", "Headphone", R.drawable.headphones_black));
-        }
-        RecommendedAdapter recAdapter = new RecommendedAdapter(recommendedList);
-        rvRecommended.setAdapter(recAdapter);
+
+        productViewModel = new ViewModelProvider(this).get(ProductViewModel.class);
+        favouritesViewModel = new ViewModelProvider(this).get(FavouritesViewModel.class);
+
+        productViewModel.getProductsLiveData().observe(getViewLifecycleOwner(), products -> {
+            RecommendedAdapter adapter = new RecommendedAdapter(products, favouritesViewModel);
+            rvRecommended.setAdapter(adapter);
+            
+            if (!products.isEmpty()) {
+                DealsAdapter dealsAdapter = new DealsAdapter(products);
+                rvDeals.setAdapter(dealsAdapter);
+            }
+        });
+
         return view;
     }
 }

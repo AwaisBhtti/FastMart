@@ -2,11 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+
     <uses-feature
         android:name="android.hardware.telephony"
         android:required="false" />
-
-    <uses-permission android:name="android.permission.SEND_SMS" />
 
     <application
         android:allowBackup="false"
@@ -19,9 +21,15 @@
         android:theme="@style/Theme.FastMart"
         tools:targetAPI="31">
         <activity
+            android:name=".AddProductActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SellerMainActivity"
+            android:exported="false" />
+        <activity
             android:name=".LoginActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize"/>
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".onBoardingActivity"
             android:exported="false" />

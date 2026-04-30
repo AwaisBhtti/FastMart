@@ -1,4 +1,5 @@
 package com.example.fastmart;
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Paint;
@@ -7,9 +8,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+import com.example.fastmart.model.Product;
+
 import java.util.List;
+import java.util.Locale;
 
 public class DealsAdapter extends RecyclerView.Adapter<DealsAdapter.DealViewHolder> {
 
@@ -31,25 +38,32 @@ public class DealsAdapter extends RecyclerView.Adapter<DealsAdapter.DealViewHold
         Product product = dealsList.get(position);
 
         holder.tvTitle.setText(product.getTitle());
-        holder.tvPrice.setText(String.format("$%.2f", product.getPrice()));
-        holder.tvOriginalPrice.setText(String.format("$%.2f", product.getOriginalPrice()));
+        holder.tvPrice.setText(String.format(Locale.US, "$%.2f", product.getPrice()));
+        holder.tvOriginalPrice.setText(String.format(Locale.US, "$%.2f", product.getOriginalPrice()));
         holder.tvDesc.setText(product.getDescription());
-        holder.imgProduct.setImageResource(product.getImageResource());
         holder.tvCategory.setText(product.getCategory());
         holder.tvOriginalPrice.setPaintFlags(holder.tvOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+
+        if (product.getImageUrl() != null && !product.getImageUrl().isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(product.getImageUrl())
+                    .placeholder(R.drawable.nest_mini)
+                    .into(holder.imgProduct);
+        } else {
+            holder.imgProduct.setImageResource(R.drawable.nest_mini);
+        }
+
         holder.itemView.setOnClickListener(v -> {
             Context context = v.getContext();
             Intent intent = new Intent(context, ProductActivity.class);
             intent.putExtra("ID", product.getId());
             intent.putExtra("NAME", product.getTitle());
-            intent.putExtra("PRICE", String.format("$%.2f", product.getPrice()));
-            intent.putExtra("ORIGINAL_PRICE", String.format("$%.2f", product.getOriginalPrice()));
+            intent.putExtra("PRICE", String.format(Locale.US, "$%.2f", product.getPrice()));
+            intent.putExtra("ORIGINAL_PRICE", String.format(Locale.US, "$%.2f", product.getOriginalPrice()));
             intent.putExtra("DESC", product.getDescription());
-            intent.putExtra("IMG", product.getImageResource());
             intent.putExtra("CATEGORY", product.getCategory());
             context.startActivity(intent);
         });
-
     }
 
     @Override

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/seller_home"
+            android:icon="@drawable/home"
+            android:title="@string/home" />
+        <item
+            android:id="@+id/seller_orders"
+            android:icon="@drawable/cart"
+            android:title="@string/order_history" />
+        <item
+            android:id="@+id/seller_account"
+            android:icon="@drawable/profile"
+            android:title="@string/account" />
+    </group>
+    <item android:title="Settings">
+        <menu>
+            <item
+                android:id="@+id/theme_toggle"
+                android:icon="@drawable/ic_launcher_background"
+                android:title="@string/theme_toggle" />
+            <item
+                android:id="@+id/logout"
+                android:icon="@drawable/back_arrow"
+                android:title="@string/logout" />
+        </menu>
+    </item>
+</menu>
